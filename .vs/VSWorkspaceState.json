@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\TaskStore",
+    "\\TaskStore\\Data",
+    "\\TaskStore\\Migrations",
+    "\\TaskStore\\Views",
+    "\\TaskStore\\Views\\Stores"
+  ],
+  "SelectedNode": "\\TaskStore\\Migrations\\TaskStoreContextModelSnapshot.cs",
+  "PreviewInSolutionExplorer": false
+}
