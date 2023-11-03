@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using TaskStore.Data;
 using TaskStore.Models;
+using Newtonsoft.Json;
 
 namespace TaskStore.Controllers
 {
@@ -89,28 +90,44 @@ namespace TaskStore.Controllers
             {
                 using (var reader = new StreamReader(file.OpenReadStream()))
                 {
-                    var xmlString = reader.ReadToEnd();
+                    var fileName = Path.GetFileName(file.FileName);
 
-                    var xmlDoc = new XmlDocument();
-                    xmlDoc.LoadXml(xmlString);
-
-                    var storeNodes = xmlDoc.SelectNodes("//store");
-
-                    foreach (XmlNode storeNode in storeNodes)
+                    if (fileName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase))
                     {
-                        var store = new Store
+
+                        var xmlString = reader.ReadToEnd();
+                        var xmlDoc = new XmlDocument();
+                        xmlDoc.LoadXml(xmlString);
+
+                        var storeNodes = xmlDoc.SelectNodes("//store");
+
+                        foreach (XmlNode storeNode in storeNodes)
                         {
-                            Name = storeNode.Attributes["name"].Value,
-                            Address = storeNode.Attributes["address"].Value,
-                            WorkingTime = storeNode.Attributes["workingTime"].Value
-                        };
+                            var store = new Store
+                            {
+                                Name = storeNode.Attributes["name"].Value,
+                                Address = storeNode.Attributes["address"].Value,
+                                WorkingTime = storeNode.Attributes["workingTime"].Value
+                            };
 
-                        _context.Store.Add(store);
+                            _context.Store.Add(store);
+                        }
+
+                        _context.SaveChanges();
                     }
+                    else if (fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Обработка JSON
+                        var jsonString = reader.ReadToEnd();
+                        var stores = JsonConvert.DeserializeObject<List<Store>>(jsonString);
 
-                    _context.SaveChanges();
+                        _context.Store.AddRange(stores);
+                    }
                 }
+
+                _context.SaveChanges();
             }
+
 
             return RedirectToAction("Index");
         }
