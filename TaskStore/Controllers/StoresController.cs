@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using TaskStore.Data;
 using TaskStore.Models;
 using Newtonsoft.Json;
+using System.Text;
 
 namespace TaskStore.Controllers
 {
@@ -130,6 +131,24 @@ namespace TaskStore.Controllers
 
 
             return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> ExportToCsv()
+        {
+            var stores = await _context.Store.ToListAsync();
+
+            var builder = new StringBuilder();
+            builder.AppendLine("Name,Address,WorkingTime");
+
+            foreach (var store in stores)
+            {
+                builder.AppendLine($"{store.Name},{store.Address},{store.WorkingTime}");
+            }
+
+            var csvData = builder.ToString();
+
+            byte[] buffer = Encoding.UTF8.GetBytes(csvData);
+            return File(buffer, "text/csv", "Stores.csv");
         }
 
         // GET: Stores/Edit/5
